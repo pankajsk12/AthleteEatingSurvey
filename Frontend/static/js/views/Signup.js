@@ -1,14 +1,14 @@
 import AbstractView from "./AbstractView.js";
 
 export default class extends AbstractView {
-    constructor(params) {
-        super(params);
-        this.setTitle("Signup");
-    }
+  constructor(params) {
+    super(params);
+    this.setTitle("Signup");
+  }
 
-    async getHtml() {
-        return `
-        <section id="signupForm">
+  async getHtml() {
+    return `
+      <section id="signupPage">
         <!-- Jumbotron -->
         <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
           <div class="container">
@@ -25,65 +25,57 @@ export default class extends AbstractView {
                   veritatis? Dicta facilis sint aliquid ipsum atque?
                 </p>
               </div>
-      
+
               <div class="col-lg-6 mb-5 mb-lg-0">
                 <div class="card">
                   <div class="card-body py-5 px-md-5">
-                    <form>
+                    <form id="signupForm">
                       <!-- 2 column grid layout with text inputs for the first and last names -->
                       <div class="row">
                         <div class="col-md-6 mb-4">
                           <div data-mdb-input-init class="form-outline">
-                            <input type="text" id="form3Example1" class="form-control" placeholder="First name"/>
+                            <input type="text" id="firstName" class="form-control" placeholder="First name" required/>
                           </div>
                         </div>
                         <div class="col-md-6 mb-4">
                           <div data-mdb-input-init class="form-outline">
-                            <input type="text" id="form3Example2" class="form-control" placeholder="Last name" />
+                            <input type="text" id="lastName" class="form-control" placeholder="Last name" required/>
                           </div>
                         </div>
                       </div>
-      
+
                       <!-- Email input -->
                       <div data-mdb-input-init class="form-outline mb-4">
-                        <input type="email" id="form3Example3" class="form-control" placeholder="Email Id"/>
+                        <input type="email" id="email" class="form-control" placeholder="Email Id" required/>
                       </div>
-      
+
                       <!-- Password input -->
                       <div data-mdb-input-init class="form-outline mb-4">
-                        <input type="password" id="form3Example4" class="form-control" placeholder="Password" />
+                        <input type="password" id="password" class="form-control" placeholder="Password" required/>
                       </div>
-      
-                      <!-- Checkbox -->
-                      <div class="form-check d-flex justify-content-center mb-4">
-                        <input class="form-check-input me-2" type="checkbox" value="" id="form2Example33" checked />
-                        <label class="form-check-label" for="form2Example33">
-                          Subscribe to our newsletter
-                        </label>
-                      </div>
-      
+
                       <!-- Submit button -->
                       <div class="d-flex justify-content-center">
-                        <a data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-4" href="/login">
+                        <button id="signupBtn" type="submit" class="btn btn-primary btn-block mb-4">
                             Sign up
-                        </a>
+                        </button>
                       </div>
-      
+
                       <!-- Register buttons -->
                       <div class="text-center">
                         <p>or sign up with:</p>
                         <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
                           <i class="fab fa-facebook-f"></i>
                         </button>
-      
+
                         <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
                           <i class="fab fa-google"></i>
                         </button>
-      
+
                         <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
                           <i class="fab fa-twitter"></i>
                         </button>
-      
+
                         <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-link btn-floating mx-1">
                           <i class="fab fa-github"></i>
                         </button>
@@ -97,6 +89,51 @@ export default class extends AbstractView {
         </div>
         <!-- Jumbotron -->
       </section>
-        `;
+    `;
+  }
+
+  async afterRender() {
+    console.log('afterRender called');
+
+    const signupForm = document.querySelector("#signupForm");
+
+    if (signupForm) {
+      console.log('Form element found');
+
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); // Prevent the default form submission behavior
+        console.log('Form submitted');
+
+        const firstname = document.querySelector('#firstName').value;
+        const lastname = document.querySelector('#lastName').value;
+        const email = document.querySelector("#email").value;
+        const password = document.querySelector("#password").value;
+
+        try {
+          const response = await fetch('http://localhost:9000/api/user/signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ firstname, lastname, email, password }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            console.log('Signup successful');
+            window.location.href = "/login";
+          } else {
+            console.error('Signup failed', result.message || 'Signup failed');
+            alert(result.message || 'Signup failed');
+          }
+        } catch (error) {
+          console.error('Error Signing up:', error);
+          alert('An error occurred. Please try again later.');
+        }
+      });
+    } else {
+      console.error('Form element not found');
     }
+  }
 }

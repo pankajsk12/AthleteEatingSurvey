@@ -35,7 +35,7 @@ const router = async () => {
     { path: "/signup", view: Signup },
     { path: "/success", view: Success },
     { path: "/subscription", view: Subscription },
-    { path: '/adddetails', view: AddDetails}
+    { path: "/adddetails", view: AddDetails },
   ];
 
   // Test each route for potential match
@@ -50,6 +50,7 @@ const router = async () => {
     (potentialMatch) => potentialMatch.result !== null
   );
 
+  // Default to the first route (LandingPage) if no match is found
   if (!match) {
     match = {
       route: routes[0],
@@ -59,9 +60,16 @@ const router = async () => {
 
   const view = new match.route.view(getParams(match));
 
+  // Render the matched view
   document.querySelector("#app").innerHTML = await view.getHtml();
+
+  // Call the afterRender method if it exists
+  if (typeof view.afterRender === "function") {
+    view.afterRender();
+  }
 };
 
+// Event listeners
 window.addEventListener("popstate", router);
 
 document.addEventListener("DOMContentLoaded", () => {
